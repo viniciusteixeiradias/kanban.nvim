@@ -14,7 +14,7 @@ A keyboard-centric Kanban board for Neovim that uses markdown files.
 ## Requirements
 
 - Neovim >= 0.9.0
-- Tree-sitter markdown parser (optional, falls back to pattern matching)
+- [Tree-sitter](https://github.com/nvim-treesitter/nvim-treesitter) markdown parser (optional, falls back to pattern matching)
 
 ## Installation
 
@@ -66,6 +66,8 @@ vim.keymap.set('n', '<leader>tt', kanban.toggle, { desc = 'Toggle kanban board' 
 ## Markdown Format
 
 ```markdown
+# Kanban Title
+
 ## Backlog
 - [ ] Task one
 - [ ] Task two
