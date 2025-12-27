@@ -1,5 +1,7 @@
 local M = {}
 
+-- TODO: Improve this file and find a better approach for regexes and parsing
+
 local config = require("kanban.config")
 local state = require("kanban.state")
 
