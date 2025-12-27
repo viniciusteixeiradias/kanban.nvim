@@ -24,6 +24,22 @@ function M.ensure_parent_dir(path)
   end
 end
 
+function M.read_file(path)
+  local file = io.open(path, "r")
+  if not file then return nil end
+  local content = file:read("*a")
+  file:close()
+  return content
+end
+
+function M.write_file(path, content)
+  local file = io.open(path, "w")
+  if not file then return false end
+  file:write(content)
+  file:close()
+  return true
+end
+
 function M.notify(msg, level)
   vim.notify(msg, level or vim.log.levels.INFO, { title = "kanban.nvim" })
 end

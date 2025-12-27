@@ -78,25 +78,13 @@ end
 function M.open(filepath)
   filepath = filepath or get_file_path()
 
-  local content
-  if utils.path_exists(filepath) then
-    local file = io.open(filepath, "r")
-    if file then
-      content = file:read("*a")
-      file:close()
-    end
-  end
+  local content = utils.path_exists(filepath) and utils.read_file(filepath) or nil
 
   if not content or content == "" then
     content = generate_default_content()
-    local cfg = config.get().file
-    if cfg.create_if_missing then
+    if config.get().file.create_if_missing then
       utils.ensure_parent_dir(filepath)
-      local file = io.open(filepath, "w")
-      if file then
-        file:write(content)
-        file:close()
-      end
+      utils.write_file(filepath, content)
     end
   end
 
@@ -109,11 +97,7 @@ function M.open(filepath)
   if #parsed.columns == 0 then
     content = generate_default_content()
     parsed = parser.parse(content)
-    local file = io.open(filepath, "w")
-    if file then
-      file:write(content)
-      file:close()
-    end
+    utils.write_file(filepath, content)
   end
 
   state.init(parsed, filepath)
@@ -136,15 +120,12 @@ function M.refresh()
   end
 
   local cursor = state.board.cursor
+  local content = utils.read_file(filepath)
 
-  local file = io.open(filepath, "r")
-  if not file then
+  if not content then
     utils.notify("Cannot read " .. filepath, vim.log.levels.ERROR)
     return
   end
-
-  local content = file:read("*a")
-  file:close()
 
   local parsed, err = parser.parse(content)
   if not parsed then

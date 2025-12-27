@@ -188,7 +188,6 @@ function M.add_task(text)
     text = "[ ] " .. text,
     checked = false,
     raw = "- [ ] " .. text,
-    line = nil,
   }
 
   local insert_idx = M.board.cursor.row + 1

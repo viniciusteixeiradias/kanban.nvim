@@ -41,11 +41,7 @@ local function write_to_file()
 
   table.insert(lines, "")
 
-  local file = io.open(board.filepath, "w")
-  if file then
-    file:write(table.concat(lines, "\n"))
-    file:close()
-
+  if utils.write_file(board.filepath, table.concat(lines, "\n")) then
     if config.get().auto_refresh_buffers then
       refresh_open_buffers(board.filepath)
     end
