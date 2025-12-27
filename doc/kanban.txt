@@ -13,6 +13,11 @@ CONTENTS                                                      *kanban-contents*
     5. Commands ........................................... |kanban-commands|
     6. Keymaps ............................................ |kanban-keymaps|
     7. Configuration ...................................... |kanban-configuration|
+       - File options ..................................... |kanban-config-file|
+       - Column options ................................... |kanban-config-columns|
+       - Window options ................................... |kanban-config-window|
+       - Highlights ....................................... |kanban-config-highlights|
+       - Other options .................................... |kanban-config-options|
     8. Markdown Format .................................... |kanban-format|
 
 ==============================================================================
@@ -122,8 +127,16 @@ Call the setup function with your options: >lua
         height = 0.8,            -- Percentage of editor height
         border = "rounded",      -- Border style
       },
+      highlights = {
+        column_header = { bold = true, fg = "#888888" },
+        column_header_active = { bold = true, fg = "#ffffff", bg = "#3a3a3a" },
+        task = { default = true },
+        task_active = { fg = "#000000", bg = "#7dd3fc", bold = true },
+        task_done = { strikethrough = true, fg = "#666666" },
+        separator = { fg = "#444444" },
+      },
       auto_refresh_buffers = true, -- Refresh open markdown buffers on changes
-      move_on_complete = true,     -- Move task to Done when checked
+      on_complete_move_to = "Done",-- Target column when checked (nil to disable)
       keymap = "<leader>tk",       -- Global keymap (false to disable)
     })
 <
@@ -174,6 +187,43 @@ window.border ~
 
     Border style. See |nvim_open_win()| for options.
 
+                                                    *kanban-config-highlights*
+highlights ~
+    Type: `table`
+
+    Customize the appearance of the kanban board. Each key accepts a table
+    of highlight attributes (see |nvim_set_hl()| for available options).
+
+highlights.column_header ~
+    Default: `{ bold = true, fg = "#888888" }`
+
+    Style for inactive column headers.
+
+highlights.column_header_active ~
+    Default: `{ bold = true, fg = "#ffffff", bg = "#3a3a3a" }`
+
+    Style for the currently selected column header.
+
+highlights.task ~
+    Default: `{ default = true }`
+
+    Style for regular tasks.
+
+highlights.task_active ~
+    Default: `{ fg = "#000000", bg = "#7dd3fc", bold = true }`
+
+    Style for the currently selected task.
+
+highlights.task_done ~
+    Default: `{ strikethrough = true, fg = "#666666" }`
+
+    Style for completed tasks (checked).
+
+highlights.separator ~
+    Default: `{ fg = "#444444" }`
+
+    Style for column separators.
+
                                                        *kanban-config-options*
 auto_refresh_buffers ~
     Type: `boolean`
@@ -182,12 +232,14 @@ auto_refresh_buffers ~
     When true, any open buffer for the kanban markdown file will be
     automatically refreshed when changes are made through the board.
 
-move_on_complete ~
-    Type: `boolean`
-    Default: `true`
+on_complete_move_to ~
+    Type: `string` or `nil`
+    Default: `"Done"`
 
-    When true, checking a task with `x` automatically moves it to the
-    "Done" column (or any column containing "done" in its name).
+    Target column name to move tasks when checked with `x`. The match is
+    case-insensitive. Set to `nil` to disable automatic moving. If the
+    target column doesn't exist, a warning is shown and the task stays
+    in place.
 
 keymap ~
     Type: `string` or `false`

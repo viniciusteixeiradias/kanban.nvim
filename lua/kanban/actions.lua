@@ -108,12 +108,13 @@ function M.move_task_down()
   end
 end
 
-local function find_done_column_index()
+local function find_target_column_index(target)
   local board = state.board
   if not board then return nil end
 
+  local target_lower = target:lower()
   for idx, column in ipairs(board.columns) do
-    if column.name:lower():match("done") then
+    if column.name:lower():match(target_lower) then
       return idx
     end
   end
@@ -124,14 +125,17 @@ function M.toggle_checkbox()
   if state.toggle_current_task() then
     local task = state.get_current_task()
     local moved = false
+    local target_column = config.get().on_complete_move_to
 
-    if task and task.checked and config.get().move_on_complete then
-      local done_idx = find_done_column_index()
+    if task and task.checked and target_column then
+      local target_idx = find_target_column_index(target_column)
       local current_col_idx = state.board.cursor.col
 
-      if done_idx and done_idx ~= current_col_idx then
-        local direction = done_idx - current_col_idx
-        while state.board.cursor.col ~= done_idx do
+      if not target_idx then
+        utils.notify("Target column '" .. target_column .. "' not found", vim.log.levels.WARN)
+      elseif target_idx ~= current_col_idx then
+        local direction = target_idx - current_col_idx
+        while state.board.cursor.col ~= target_idx do
           state.move_task_horizontal(direction > 0 and 1 or -1)
         end
         moved = true
@@ -143,7 +147,7 @@ function M.toggle_checkbox()
 
     if task then
       if moved then
-        utils.notify("Task completed and moved to Done")
+        utils.notify("Task completed and moved to " .. target_column)
       else
         local status = task.checked and "completed" or "uncompleted"
         utils.notify("Task " .. status)

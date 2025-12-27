@@ -9,12 +9,13 @@ M.win = nil
 M.buf = nil
 
 local function setup_highlights()
-  vim.api.nvim_set_hl(0, "KanbanColumnHeader", { bold = true, fg = "#888888" })
-  vim.api.nvim_set_hl(0, "KanbanColumnHeaderActive", { bold = true, fg = "#ffffff", bg = "#3a3a3a" })
-  vim.api.nvim_set_hl(0, "KanbanTask", { default = true })
-  vim.api.nvim_set_hl(0, "KanbanTaskActive", { fg = "#000000", bg = "#7dd3fc", bold = true })
-  vim.api.nvim_set_hl(0, "KanbanTaskDone", { strikethrough = true, fg = "#666666" })
-  vim.api.nvim_set_hl(0, "KanbanSeparator", { fg = "#444444" })
+  local hl = config.get().highlights
+  vim.api.nvim_set_hl(0, "KanbanColumnHeader", hl.column_header)
+  vim.api.nvim_set_hl(0, "KanbanColumnHeaderActive", hl.column_header_active)
+  vim.api.nvim_set_hl(0, "KanbanTask", hl.task)
+  vim.api.nvim_set_hl(0, "KanbanTaskActive", hl.task_active)
+  vim.api.nvim_set_hl(0, "KanbanTaskDone", hl.task_done)
+  vim.api.nvim_set_hl(0, "KanbanSeparator", hl.separator)
 end
 
 local function calculate_column_width(win_width, num_columns)

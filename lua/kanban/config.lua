@@ -15,10 +15,19 @@ local defaults = {
     height = 0.8,
     border = "rounded",
   },
+  -- Highlight colors
+  highlights = {
+    column_header = { bold = true, fg = "#888888" },
+    column_header_active = { bold = true, fg = "#ffffff", bg = "#3a3a3a" },
+    task = { default = true },
+    task_active = { fg = "#000000", bg = "#7dd3fc", bold = true },
+    task_done = { strikethrough = true, fg = "#666666" },
+    separator = { fg = "#444444" },
+  },
   -- Auto-refresh open buffers when changes are made
   auto_refresh_buffers = true,
-  -- Move task to "Done" column when checked
-  move_on_complete = true,
+  -- Target column when task is checked (case-insensitive match, nil to disable)
+  on_complete_move_to = "Done",
   -- Keymap to open kanban (set to false to disable)
   keymap = "<leader>tk",
 }
