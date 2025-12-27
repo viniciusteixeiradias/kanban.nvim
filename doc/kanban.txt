@@ -1,0 +1,269 @@
+*kanban.txt*                        A keyboard-centric Kanban board for Neovim
+
+Author: Vinicius Teixeira Dias
+License: MIT
+
+==============================================================================
+CONTENTS                                                      *kanban-contents*
+
+    1. Introduction ....................................... |kanban-introduction|
+    2. Requirements ....................................... |kanban-requirements|
+    3. Installation ....................................... |kanban-installation|
+    4. Usage .............................................. |kanban-usage|
+    5. Commands ........................................... |kanban-commands|
+    6. Keymaps ............................................ |kanban-keymaps|
+    7. Configuration ...................................... |kanban-configuration|
+       - File options ..................................... |kanban-config-file|
+       - Column options ................................... |kanban-config-columns|
+       - Window options ................................... |kanban-config-window|
+       - Highlights ....................................... |kanban-config-highlights|
+       - Other options .................................... |kanban-config-options|
+    8. Markdown Format .................................... |kanban-format|
+
+==============================================================================
+1. INTRODUCTION                                           *kanban-introduction*
+
+kanban.nvim is a keyboard-centric Kanban board for Neovim that uses markdown
+files as the data source.
+
+Features:
+- Markdown-based: Uses `## Headings` as columns and `- [ ] items` as tasks
+- Keyboard-driven: Navigate and manage tasks without leaving the keyboard
+- Compatible: Works with Obsidian-style markdown files
+- Auto-sync: Optionally refreshes open buffers when changes are made
+
+==============================================================================
+2. REQUIREMENTS                                           *kanban-requirements*
+
+- Neovim >= 0.9.0
+- Tree-sitter markdown parser (optional, falls back to pattern matching)
+
+==============================================================================
+3. INSTALLATION                                           *kanban-installation*
+
+Using lazy.nvim: >lua
+    {
+      "viniciusteixeiradias/kanban.nvim",
+      config = function()
+        require("kanban").setup()
+      end,
+    }
+<
+
+Using packer.nvim: >lua
+    use {
+      "viniciusteixeiradias/kanban.nvim",
+      config = function()
+        require("kanban").setup()
+      end,
+    }
+<
+
+==============================================================================
+4. USAGE                                                         *kanban-usage*
+
+Open a kanban board with |:Kanban| or the default keymap `<leader>tk`.
+
+The plugin will look for a `TODO.md` file in your project root (git root or
+current working directory). If not found, it creates one with default columns.
+
+You can also specify a custom file path: >vim
+    :Kanban ~/notes/project-board.md
+<
+
+==============================================================================
+5. COMMANDS                                                   *kanban-commands*
+
+                                                                       *:Kanban*
+:Kanban [file]          Open the kanban board. Optionally specify a file path.
+                        If no file is provided, uses the configured path or
+                        auto-detects `TODO.md` in the project root.
+
+                                                                  *:KanbanClose*
+:KanbanClose            Close the kanban board window.
+
+                                                                 *:KanbanToggle*
+:KanbanToggle           Toggle the kanban board open/closed.
+
+==============================================================================
+6. KEYMAPS                                                     *kanban-keymaps*
+
+Set up your own keymaps to open the kanban board: >lua
+    local kanban = require('kanban')
+    vim.keymap.set('n', '<leader>tk', kanban.open, { desc = 'Open kanban board' })
+    vim.keymap.set('n', '<leader>tt', kanban.toggle, { desc = 'Toggle kanban board' })
+<
+
+Board keybindings: ~
+
+Navigation:
+    `h` / `l`             Move between columns
+    `j` / `k`             Move between tasks
+
+Task Actions:
+    `H` / `L`             Move task to previous/next column
+    `J` / `K`             Move task up/down within column
+    `x`                   Toggle checkbox `[ ]` ↔ `[x]`
+    `a`                   Add new task to current column
+    `d`                   Delete current task (with confirmation)
+    `e`                   Edit current task text
+
+General:
+    `r`                   Refresh board from file
+    `?`                   Show help window
+    `q` / `<Esc>`         Close kanban board
+
+==============================================================================
+7. CONFIGURATION                                         *kanban-configuration*
+
+Call the setup function with your options: >lua
+    require("kanban").setup({
+      file = {
+        path = nil,              -- Custom path (nil = auto-detect)
+        name = "TODO.md",        -- Default filename to look for
+        create_if_missing = true,-- Create file if it doesn't exist
+      },
+      default_columns = { "Backlog", "In Progress", "Done" },
+      window = {
+        width = 0.8,             -- Percentage of editor width
+        height = 0.8,            -- Percentage of editor height
+        border = "rounded",      -- Border style
+      },
+      highlights = {
+        column_header = { bold = true, fg = "#888888" },
+        column_header_active = { bold = true, fg = "#ffffff", bg = "#3a3a3a" },
+        task = { default = true },
+        task_active = { fg = "#000000", bg = "#7dd3fc", bold = true },
+        task_done = { strikethrough = true, fg = "#666666" },
+        separator = { fg = "#444444" },
+      },
+      auto_refresh_buffers = true, -- Refresh open markdown buffers on changes
+      on_complete_move_to = "Done",-- Target column when checked (nil to disable)
+    })
+<
+
+                                                          *kanban-config-file*
+file.path ~
+    Type: `string` or `nil`
+    Default: `nil`
+
+    Custom path to the markdown file. When nil, the plugin auto-detects
+    by looking for `file.name` in the project root.
+
+file.name ~
+    Type: `string`
+    Default: `"TODO.md"`
+
+    Filename to look for when auto-detecting.
+
+file.create_if_missing ~
+    Type: `boolean`
+    Default: `true`
+
+    Create the file with default columns if it doesn't exist.
+
+                                                       *kanban-config-columns*
+default_columns ~
+    Type: `table`
+    Default: `{ "Backlog", "In Progress", "Done" }`
+
+    Column names used when creating a new kanban file.
+
+                                                        *kanban-config-window*
+window.width ~
+    Type: `number`
+    Default: `0.8`
+
+    Width of the floating window as a percentage of editor width.
+
+window.height ~
+    Type: `number`
+    Default: `0.8`
+
+    Height of the floating window as a percentage of editor height.
+
+window.border ~
+    Type: `string`
+    Default: `"rounded"`
+
+    Border style. See |nvim_open_win()| for options.
+
+                                                    *kanban-config-highlights*
+highlights ~
+    Type: `table`
+
+    Customize the appearance of the kanban board. Each key accepts a table
+    of highlight attributes (see |nvim_set_hl()| for available options).
+
+highlights.column_header ~
+    Default: `{ bold = true, fg = "#888888" }`
+
+    Style for inactive column headers.
+
+highlights.column_header_active ~
+    Default: `{ bold = true, fg = "#ffffff", bg = "#3a3a3a" }`
+
+    Style for the currently selected column header.
+
+highlights.task ~
+    Default: `{ default = true }`
+
+    Style for regular tasks.
+
+highlights.task_active ~
+    Default: `{ fg = "#000000", bg = "#7dd3fc", bold = true }`
+
+    Style for the currently selected task.
+
+highlights.task_done ~
+    Default: `{ strikethrough = true, fg = "#666666" }`
+
+    Style for completed tasks (checked).
+
+highlights.separator ~
+    Default: `{ fg = "#444444" }`
+
+    Style for column separators.
+
+                                                       *kanban-config-options*
+auto_refresh_buffers ~
+    Type: `boolean`
+    Default: `true`
+
+    When true, any open buffer for the kanban markdown file will be
+    automatically refreshed when changes are made through the board.
+
+on_complete_move_to ~
+    Type: `string` or `nil`
+    Default: `"Done"`
+
+    Target column name to move tasks when checked with `x`. The match is
+    case-insensitive. Set to `nil` to disable automatic moving. If the
+    target column doesn't exist, a warning is shown and the task stays
+    in place.
+
+==============================================================================
+8. MARKDOWN FORMAT                                             *kanban-format*
+
+The plugin uses a simple markdown format compatible with Obsidian and other
+markdown editors:
+
+>markdown
+    ## Backlog
+    - [ ] Task one
+    - [ ] Task two
+
+    ## In Progress
+    - [ ] Current task
+
+    ## Done
+    - [x] Completed task
+<
+
+- `## Heading` defines a column
+- `- [ ] text` defines an unchecked task
+- `- [x] text` defines a checked/completed task
+- Standard list markers (`-`, `*`, `+`) are supported
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
