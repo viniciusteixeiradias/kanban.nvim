@@ -27,6 +27,11 @@ local function write_to_file()
 
   local lines = {}
 
+  if board.title then
+    table.insert(lines, "# " .. board.title)
+    table.insert(lines, "")
+  end
+
   for col_idx, column in ipairs(board.columns) do
     if col_idx > 1 then
       table.insert(lines, "")

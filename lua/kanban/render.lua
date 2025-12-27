@@ -108,11 +108,14 @@ end
 
 local function create_window()
   local cfg = config.get().window
+  local board = state.board
 
   local width = math.floor(vim.o.columns * cfg.width)
   local height = math.floor(vim.o.lines * cfg.height)
   local row = math.floor((vim.o.lines - height) / 2)
   local col = math.floor((vim.o.columns - width) / 2)
+
+  local title = board and board.title or "Kanban"
 
   local buf = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_set_option_value("buftype", "nofile", { buf = buf })
@@ -128,7 +131,7 @@ local function create_window()
     col = col,
     style = "minimal",
     border = cfg.border,
-    title = " Kanban ",
+    title = " " .. title .. " ",
     title_pos = "center",
     footer = " h/l:cols  j/k:tasks  H/L:move  a:add  d:del  x:toggle  e:edit  ?:help  q:quit ",
     footer_pos = "center",

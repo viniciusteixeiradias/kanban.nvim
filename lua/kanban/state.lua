@@ -5,6 +5,7 @@ local M = {}
 --- @field columns table[] List of columns, each with name and tasks
 --- @field cursor { col: number, row: number } Current cursor position (1-indexed)
 --- @field filepath string Path to the source markdown file
+--- @field title string|nil The board title from H1 heading
 M.board = nil
 
 --- Initializes the board state from parsed data
@@ -15,6 +16,7 @@ function M.init(parsed, filepath)
     columns = parsed.columns,
     cursor = { col = 1, row = 1 },
     filepath = filepath,
+    title = parsed.title,
   }
 
   M.clamp_cursor()

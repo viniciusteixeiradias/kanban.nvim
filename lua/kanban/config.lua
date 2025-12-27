@@ -28,8 +28,6 @@ local defaults = {
   auto_refresh_buffers = true,
   -- Target column when task is checked (case-insensitive match, nil to disable)
   on_complete_move_to = "Done",
-  -- Keymap to open kanban (set to false to disable)
-  keymap = "<leader>tk",
 }
 
 M._config = vim.deepcopy(defaults)

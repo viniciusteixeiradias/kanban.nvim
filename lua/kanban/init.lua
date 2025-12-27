@@ -34,8 +34,8 @@ local function setup_keymaps()
   vim.keymap.set("n", "r", M.refresh, opts)
 end
 
-local function generate_default_content()
-  local columns = config.get().default_columns
+local function write_default_content(filepath)
+  local columns = config.get().default_columns or { "Backlog", "In Progress", "Done" }
   local lines = { "# Kanban Board", "" }
 
   for _, col_name in ipairs(columns) do
@@ -43,7 +43,11 @@ local function generate_default_content()
     table.insert(lines, "")
   end
 
-  return table.concat(lines, "\n")
+  local content = table.concat(lines, "\n")
+  utils.ensure_parent_dir(filepath)
+  utils.write_file(filepath, content)
+
+  return content
 end
 
 local function get_file_path()
@@ -68,36 +72,33 @@ end
 
 function M.setup(opts)
   config.setup(opts)
-
-  local keymap = config.get().keymap
-  if keymap then
-    vim.keymap.set("n", keymap, M.open, { desc = "Open kanban board" })
-  end
 end
 
 function M.open(filepath)
   filepath = filepath or get_file_path()
+  local path_exists = utils.path_exists(filepath)
 
-  local content = utils.path_exists(filepath) and utils.read_file(filepath) or nil
-
-  if not content or content == "" then
-    content = generate_default_content()
-    if config.get().file.create_if_missing then
-      utils.ensure_parent_dir(filepath)
-      utils.write_file(filepath, content)
-    end
+  if not path_exists and not config.get().file.create_if_missing then
+    utils.notify("File not found: " .. filepath, vim.log.levels.ERROR)
+    return
   end
 
+  local content = utils.read_file(filepath) or write_default_content(filepath)
   local parsed, err = parser.parse(content)
-  if not parsed then
+
+  if not parsed or err then
     utils.notify(err or "Failed to parse markdown", vim.log.levels.ERROR)
     return
   end
 
   if #parsed.columns == 0 then
-    content = generate_default_content()
-    parsed = parser.parse(content)
-    utils.write_file(filepath, content)
+    content = write_default_content(filepath)
+    parsed, err = parser.parse(content)
+
+    if not parsed then
+      utils.notify(err or "Failed to parse default content", vim.log.levels.ERROR)
+      return
+    end
   end
 
   state.init(parsed, filepath)

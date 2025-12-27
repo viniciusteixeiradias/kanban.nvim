@@ -1,5 +1,7 @@
 local M = {}
 
+-- TODO: Improve this file, maybe even remove fallback entirely
+
 --- Extracts text content from a Tree-sitter node
 --- @param node userdata Tree-sitter node
 --- @param source string The full source text
@@ -33,6 +35,30 @@ local function parse_task_text(text)
   return { text = text, checked = false }
 end
 
+--- Extracts the H1 title from the document using Tree-sitter
+--- @param root userdata Tree-sitter root node
+--- @param content string The full source text
+--- @return string|nil The title text or nil if not found
+local function extract_title_ts(root, content)
+  local query_str = [[
+    (section
+      (atx_heading
+        (atx_h1_marker)
+        heading_content: (_) @title))
+  ]]
+
+  local query_ok, query = pcall(vim.treesitter.query.parse, "markdown", query_str)
+  if not query_ok then
+    return nil
+  end
+
+  for _, node in query:iter_captures(root, content, 0, -1) do
+    return vim.trim(get_node_text(node, content))
+  end
+
+  return nil
+end
+
 --- Parses markdown content using Tree-sitter to extract kanban columns and tasks
 --- Columns are H2 headings (## Column Name)
 --- Tasks are list items under each heading
@@ -54,6 +80,7 @@ function M.parse(content)
   local root = tree:root()
   local lines = vim.split(content, "\n")
   local columns = {}
+  local title = extract_title_ts(root, content)
 
   -- Tree-sitter query to find all H2 headings (## Heading)
   -- Each H2 heading becomes a kanban column
@@ -106,7 +133,7 @@ function M.parse(content)
     })
   end
 
-  return { columns = columns }
+  return { columns = columns, title = title }
 end
 
 --- Fallback parser using Lua patterns when Tree-sitter is unavailable
@@ -116,8 +143,17 @@ function M.parse_fallback(content)
   local lines = vim.split(content, "\n")
   local columns = {}
   local current_column = nil
+  local title = nil
 
   for i, line in ipairs(lines) do
+    -- Check for H1 heading: # Title (only capture first one)
+    if not title then
+      local h1 = line:match("^#%s+(.+)$")
+      if h1 and not line:match("^##") then
+        title = vim.trim(h1)
+      end
+    end
+
     -- Check for H2 heading: ## Column Name
     local heading = line:match("^##%s+(.+)$")
     if heading then
@@ -143,7 +179,7 @@ function M.parse_fallback(content)
     table.insert(columns, current_column)
   end
 
-  return { columns = columns }
+  return { columns = columns, title = title }
 end
 
 --- Convenience function to parse a markdown file directly
