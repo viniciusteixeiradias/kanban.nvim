@@ -185,6 +185,7 @@ function M.add_task()
     if vim.api.nvim_buf_is_valid(buf) then
       vim.api.nvim_buf_delete(buf, { force = true })
     end
+    vim.cmd("stopinsert")
 
     if text and text ~= "" then
       state.add_task(text)
@@ -198,6 +199,7 @@ function M.add_task()
     if vim.api.nvim_win_is_valid(win) then
       vim.api.nvim_win_close(win, true)
     end
+    vim.cmd("stopinsert")
   end, { buffer = buf, nowait = true })
 
   vim.cmd("startinsert!")
@@ -266,6 +268,7 @@ function M.edit_task()
     local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
     local text = lines[1] or ""
     close_window()
+    vim.cmd("stopinsert")
 
     if text ~= "" then
       state.update_current_task(text)
@@ -275,7 +278,10 @@ function M.edit_task()
     end
   end, { buffer = buf, nowait = true })
 
-  vim.keymap.set({ "n", "i" }, "<Esc>", close_window, { buffer = buf, nowait = true })
+  vim.keymap.set({ "n", "i" }, "<Esc>", function()
+    close_window()
+    vim.cmd("stopinsert")
+  end, { buffer = buf, nowait = true })
 
   vim.cmd("startinsert!")
   vim.api.nvim_win_set_cursor(win, { 1, #current_text })
