@@ -2,6 +2,8 @@
 
 A keyboard-centric Kanban board for Neovim that uses markdown files.
 
+![kanban-gif](https://github.com/user-attachments/assets/b871009b-8f33-401b-add4-0d310daae183)
+
 ## Features
 
 - **Markdown-based** - Uses `## Headings` as columns and `- [ ] items` as tasks
