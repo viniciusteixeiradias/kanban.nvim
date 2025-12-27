@@ -10,9 +10,12 @@ local function refresh_open_buffers(filepath)
     if vim.api.nvim_buf_is_loaded(bufnr) then
       local buf_name = vim.api.nvim_buf_get_name(bufnr)
       if buf_name == filepath then
-        vim.api.nvim_buf_call(bufnr, function()
-          vim.cmd("edit!")
-        end)
+        if not vim.bo[bufnr].modified then
+          vim.api.nvim_buf_call(bufnr, function()
+            vim.cmd("edit!")
+          end)
+        end
+        break
       end
     end
   end
