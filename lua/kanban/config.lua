@@ -9,6 +9,8 @@ local defaults = {
   },
   -- Default columns when creating a new file
   default_columns = { "Backlog", "In Progress", "Done" },
+  -- Target column when task is checked (case-insensitive match, nil to disable)
+  on_complete_move_to = "Done",
   -- Floating window settings
   window = {
     width = 0.8,
@@ -26,8 +28,6 @@ local defaults = {
   },
   -- Auto-refresh open buffers when changes are made
   auto_refresh_buffers = true,
-  -- Target column when task is checked (case-insensitive match, nil to disable)
-  on_complete_move_to = "Done",
   -- Keymap to open kanban (set to false to disable)
   keymap = "<leader>tk",
 }

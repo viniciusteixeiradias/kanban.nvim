@@ -88,9 +88,11 @@ You can also specify a custom file path: >vim
 ==============================================================================
 6. KEYMAPS                                                     *kanban-keymaps*
 
-Global keymap (configurable): ~
-
-    `<leader>tk`          Open kanban board
+Set up your own keymaps to open the kanban board: >lua
+    local kanban = require('kanban')
+    vim.keymap.set('n', '<leader>tk', kanban.open, { desc = 'Open kanban board' })
+    vim.keymap.set('n', '<leader>tt', kanban.toggle, { desc = 'Toggle kanban board' })
+<
 
 Board keybindings: ~
 
@@ -137,7 +139,6 @@ Call the setup function with your options: >lua
       },
       auto_refresh_buffers = true, -- Refresh open markdown buffers on changes
       on_complete_move_to = "Done",-- Target column when checked (nil to disable)
-      keymap = "<leader>tk",       -- Global keymap (false to disable)
     })
 <
 
@@ -240,12 +241,6 @@ on_complete_move_to ~
     case-insensitive. Set to `nil` to disable automatic moving. If the
     target column doesn't exist, a warning is shown and the task stays
     in place.
-
-keymap ~
-    Type: `string` or `false`
-    Default: `"<leader>tk"`
-
-    Global keymap to open the kanban board. Set to `false` to disable.
 
 ==============================================================================
 8. MARKDOWN FORMAT                                             *kanban-format*

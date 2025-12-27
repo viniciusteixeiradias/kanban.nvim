@@ -37,11 +37,13 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 | `:KanbanClose` | Close kanban board |
 | `:KanbanToggle` | Toggle kanban board |
 
-### Default Keymaps
+### Keymaps
 
-| Keymap | Action |
-|--------|--------|
-| `<leader>tk` | Open kanban board |
+```lua
+local kanban = require('kanban')
+vim.keymap.set('n', '<leader>tk', kanban.open, { desc = 'Open kanban board' })
+vim.keymap.set('n', '<leader>tt', kanban.toggle, { desc = 'Toggle kanban board' })
+```
 
 ### Board Keybindings
 
@@ -98,7 +100,6 @@ require("kanban").setup({
   },
   auto_refresh_buffers = true,  -- Refresh open markdown buffers on changes
   on_complete_move_to = "Done", -- Target column when checked (nil to disable)
-  keymap = "<leader>tk",        -- Set to false to disable
 })
 ```
 
