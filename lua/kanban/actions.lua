@@ -58,55 +58,32 @@ local function refresh()
   render.render()
 end
 
-function M.cursor_left()
-  state.move_cursor_horizontal(-1)
-  refresh()
-end
-
-function M.cursor_right()
-  state.move_cursor_horizontal(1)
-  refresh()
-end
-
-function M.cursor_up()
-  state.move_cursor_vertical(-1)
-  refresh()
-end
-
-function M.cursor_down()
-  state.move_cursor_vertical(1)
-  refresh()
-end
-
-function M.move_task_left()
-  if state.move_task_horizontal(-1) then
-    write_to_file()
-    refresh()
-    utils.notify("Task moved left")
-  end
-end
-
-function M.move_task_right()
-  if state.move_task_horizontal(1) then
-    write_to_file()
-    refresh()
-    utils.notify("Task moved right")
-  end
-end
-
-function M.move_task_up()
-  if state.move_task_vertical(-1) then
-    write_to_file()
+local function create_cursor_action(state_fn, direction)
+  return function()
+    state_fn(direction)
     refresh()
   end
 end
 
-function M.move_task_down()
-  if state.move_task_vertical(1) then
-    write_to_file()
-    refresh()
+M.cursor_left = create_cursor_action(state.move_cursor_horizontal, -1)
+M.cursor_right = create_cursor_action(state.move_cursor_horizontal, 1)
+M.cursor_up = create_cursor_action(state.move_cursor_vertical, -1)
+M.cursor_down = create_cursor_action(state.move_cursor_vertical, 1)
+
+local function create_move_task_action(state_fn, direction, message)
+  return function()
+    if state_fn(direction) then
+      write_to_file()
+      refresh()
+      utils.notify(message)
+    end
   end
 end
+
+M.move_task_left = create_move_task_action(state.move_task_horizontal, -1, "Task moved left")
+M.move_task_right = create_move_task_action(state.move_task_horizontal, 1, "Task moved right")
+M.move_task_up = create_move_task_action(state.move_task_vertical, -1, "Task moved up")
+M.move_task_down = create_move_task_action(state.move_task_vertical, 1, "Task moved down")
 
 local function find_target_column_index(target)
   local board = state.board
@@ -156,17 +133,15 @@ function M.toggle_checkbox()
   end
 end
 
-function M.add_task()
-  local column = state.get_current_column()
-  if not column then return end
-
-  local width = 50
+local function create_input_dialog(opts)
+  local width = opts.width or 50
   local height = 1
   local row = math.floor((vim.o.lines - height) / 2)
   local col = math.floor((vim.o.columns - width) / 2)
 
   local buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_set_option_value("buftype", "prompt", { buf = buf })
+  vim.api.nvim_set_option_value("buftype", "nofile", { buf = buf })
+  vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = buf })
 
   local win = vim.api.nvim_open_win(buf, true, {
     relative = "editor",
@@ -176,37 +151,49 @@ function M.add_task()
     col = col,
     style = "minimal",
     border = "rounded",
-    title = " Add Task to " .. column.name .. " ",
+    title = opts.title,
     title_pos = "center",
   })
 
-  vim.fn.prompt_setprompt(buf, "> ")
+  local initial_text = opts.initial_text or ""
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, { initial_text })
+  vim.api.nvim_win_set_cursor(win, { 1, #initial_text })
 
-  vim.fn.prompt_setcallback(buf, function(text)
+  local function close_window()
     if vim.api.nvim_win_is_valid(win) then
       vim.api.nvim_win_close(win, true)
     end
-    if vim.api.nvim_buf_is_valid(buf) then
-      vim.api.nvim_buf_delete(buf, { force = true })
-    end
     vim.cmd("stopinsert")
+  end
 
-    if text and text ~= "" then
+  vim.keymap.set({ "n", "i" }, "<CR>", function()
+    local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+    local text = lines[1] or ""
+    close_window()
+    if text ~= "" then
+      opts.on_submit(text)
+    end
+  end, { buffer = buf, nowait = true })
+
+  vim.keymap.set({ "n", "i" }, "<Esc>", close_window, { buffer = buf, nowait = true })
+
+  vim.cmd("startinsert!")
+  vim.api.nvim_win_set_cursor(win, { 1, #initial_text })
+end
+
+function M.add_task()
+  local column = state.get_current_column()
+  if not column then return end
+
+  create_input_dialog({
+    title = " Add Task to " .. column.name .. " ",
+    on_submit = function(text)
       state.add_task(text)
       write_to_file()
       refresh()
       utils.notify("Task added")
-    end
-  end)
-
-  vim.keymap.set("n", "<Esc>", function()
-    if vim.api.nvim_win_is_valid(win) then
-      vim.api.nvim_win_close(win, true)
-    end
-    vim.cmd("stopinsert")
-  end, { buffer = buf, nowait = true })
-
-  vim.cmd("startinsert!")
+    end,
+  })
 end
 
 function M.delete_task()
@@ -238,57 +225,17 @@ function M.edit_task()
 
   local current_text = task.text:gsub("^%[[x ]%]%s*", "")
 
-  local width = 60
-  local height = 1
-  local row = math.floor((vim.o.lines - height) / 2)
-  local col = math.floor((vim.o.columns - width) / 2)
-
-  local buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_set_option_value("buftype", "nofile", { buf = buf })
-  vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = buf })
-
-  local win = vim.api.nvim_open_win(buf, true, {
-    relative = "editor",
-    width = width,
-    height = height,
-    row = row,
-    col = col,
-    style = "minimal",
-    border = "rounded",
-    title = " Edit Task (Enter to save, Esc to cancel) ",
-    title_pos = "center",
-  })
-
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, { current_text })
-  vim.api.nvim_win_set_cursor(win, { 1, #current_text })
-
-  local function close_window()
-    if vim.api.nvim_win_is_valid(win) then
-      vim.api.nvim_win_close(win, true)
-    end
-  end
-
-  vim.keymap.set({ "n", "i" }, "<CR>", function()
-    local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-    local text = lines[1] or ""
-    close_window()
-    vim.cmd("stopinsert")
-
-    if text ~= "" then
+  create_input_dialog({
+    title = " Edit Task ",
+    width = 60,
+    initial_text = current_text,
+    on_submit = function(text)
       state.update_current_task(text)
       write_to_file()
       refresh()
       utils.notify("Task updated")
-    end
-  end, { buffer = buf, nowait = true })
-
-  vim.keymap.set({ "n", "i" }, "<Esc>", function()
-    close_window()
-    vim.cmd("stopinsert")
-  end, { buffer = buf, nowait = true })
-
-  vim.cmd("startinsert!")
-  vim.api.nvim_win_set_cursor(win, { 1, #current_text })
+    end,
+  })
 end
 
 function M.show_help()

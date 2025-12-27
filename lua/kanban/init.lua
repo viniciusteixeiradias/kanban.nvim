@@ -116,7 +116,7 @@ function M.open(filepath)
     end
   end
 
-  state.init(parsed, filepath, content)
+  state.init(parsed, filepath)
   render.open()
   setup_keymaps()
 
@@ -152,7 +152,7 @@ function M.refresh()
     return
   end
 
-  state.init(parsed, filepath, content)
+  state.init(parsed, filepath)
   state.board.cursor = cursor
   state.clamp_cursor()
 

@@ -26,20 +26,11 @@ end
 --- @param text string The task text (without the leading "- ")
 --- @return table Parsed task with text and checked state
 local function parse_task_text(text)
-  local checked = false
-  local task_text = text
-
-  -- Check for checkbox pattern: [x] or [ ]
-  local checkbox_match = text:match("^%[([x ])%]%s*(.*)$")
-  if checkbox_match then
-    checked = text:match("^%[x%]") ~= nil
-    task_text = text:match("^%[[x ]%]%s*(.*)$") or ""
+  local checkbox, task_text = text:match("^%[([x ])%]%s*(.*)$")
+  if checkbox then
+    return { text = task_text, checked = checkbox == "x" }
   end
-
-  return {
-    text = task_text,
-    checked = checked,
-  }
+  return { text = text, checked = false }
 end
 
 --- Parses markdown content using Tree-sitter to extract kanban columns and tasks

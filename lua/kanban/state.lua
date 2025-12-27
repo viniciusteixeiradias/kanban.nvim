@@ -5,19 +5,16 @@ local M = {}
 --- @field columns table[] List of columns, each with name and tasks
 --- @field cursor { col: number, row: number } Current cursor position (1-indexed)
 --- @field filepath string Path to the source markdown file
---- @field lines string[] Original file lines for modification
 M.board = nil
 
 --- Initializes the board state from parsed data
 --- @param parsed table The parsed board from parser.lua
 --- @param filepath string Path to the source file
---- @param content string The original file content
-function M.init(parsed, filepath, content)
+function M.init(parsed, filepath)
   M.board = {
     columns = parsed.columns,
     cursor = { col = 1, row = 1 },
     filepath = filepath,
-    lines = vim.split(content, "\n"),
   }
 
   M.clamp_cursor()
