@@ -6,7 +6,7 @@ A keyboard-centric Kanban board for Neovim that uses markdown files.
 
 ## Features
 
-- **Markdown-based** - Uses `## Headings` as columns and `- [ ] items` as tasks
+- **Markdown-based** - Uses `# Text` as title `## Headings` as columns and `- [ ] items` as tasks
 - **Keyboard-driven** - Navigate and manage tasks without leaving the keyboard
 - **Compatible** - Works with Obsidian-style markdown files
 - **Auto-sync** - Optionally refreshes open buffers when changes are made
