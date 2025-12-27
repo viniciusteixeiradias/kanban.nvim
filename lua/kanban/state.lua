@@ -169,10 +169,10 @@ function M.toggle_current_task()
   task.checked = not task.checked
 
   if task.checked then
-    task.raw = task.raw:gsub("%[ %]", "[x]")
+    task.raw = task.raw:gsub("%[ %]", "[x]", 1)
     task.text = task.text:gsub("^%[ %]", "[x]")
   else
-    task.raw = task.raw:gsub("%[x%]", "[ ]")
+    task.raw = task.raw:gsub("%[x%]", "[ ]", 1)
     task.text = task.text:gsub("^%[x%]", "[ ]")
   end
 

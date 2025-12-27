@@ -8,7 +8,7 @@ function M.get_project_root()
   return vim.fn.getcwd()
 end
 
-function M.file_exists(path)
+function M.path_exists(path)
   local stat = vim.uv.fs_stat(path)
   return stat ~= nil
 end
@@ -19,7 +19,7 @@ end
 
 function M.ensure_parent_dir(path)
   local parent = vim.fn.fnamemodify(path, ":h")
-  if not M.file_exists(parent) then
+  if not M.path_exists(parent) then
     vim.fn.mkdir(parent, "p")
   end
 end

@@ -1,0 +1,17 @@
+:Kanban	kanban.txt	/*:Kanban*
+:KanbanClose	kanban.txt	/*:KanbanClose*
+:KanbanToggle	kanban.txt	/*:KanbanToggle*
+kanban-commands	kanban.txt	/*kanban-commands*
+kanban-config-columns	kanban.txt	/*kanban-config-columns*
+kanban-config-file	kanban.txt	/*kanban-config-file*
+kanban-config-options	kanban.txt	/*kanban-config-options*
+kanban-config-window	kanban.txt	/*kanban-config-window*
+kanban-configuration	kanban.txt	/*kanban-configuration*
+kanban-contents	kanban.txt	/*kanban-contents*
+kanban-format	kanban.txt	/*kanban-format*
+kanban-installation	kanban.txt	/*kanban-installation*
+kanban-introduction	kanban.txt	/*kanban-introduction*
+kanban-keymaps	kanban.txt	/*kanban-keymaps*
+kanban-requirements	kanban.txt	/*kanban-requirements*
+kanban-usage	kanban.txt	/*kanban-usage*
+kanban.txt	kanban.txt	/*kanban.txt*

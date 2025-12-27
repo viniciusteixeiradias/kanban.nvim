@@ -58,7 +58,7 @@ local function get_file_path()
 
   for _, name in ipairs(candidates) do
     local path = root .. "/" .. name
-    if utils.file_exists(path) then
+    if utils.path_exists(path) then
       return path
     end
   end
@@ -79,7 +79,7 @@ function M.open(filepath)
   filepath = filepath or get_file_path()
 
   local content
-  if utils.file_exists(filepath) then
+  if utils.path_exists(filepath) then
     local file = io.open(filepath, "r")
     if file then
       content = file:read("*a")
